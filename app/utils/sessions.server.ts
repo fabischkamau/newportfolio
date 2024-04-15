@@ -13,7 +13,9 @@ const sessionStorage = createCookieSessionStorage({
     sameSite: "lax",
     secrets: ["s3cr3t"],
     // Set domain and secure only if in production
-    ...(isProduction ? { domain: webUrl, secure: true } : {}),
+    ...(isProduction
+      ? { domain: "https://fabischkamau.vercel.app", secure: true }
+      : {}),
   },
 });
 
@@ -32,7 +34,9 @@ const { getSession, commitSession, destroySession } =
       name: "__session",
 
       // all of these are optional
-      ...(isProduction ? { domain: webUrl, secure: true } : {}),
+      ...(isProduction
+        ? { domain: "https://fabischkamau.vercel.app", secure: true }
+        : {}),
       // Expires can also be set (although maxAge overrides it when used in combination).
       // Note that this method is NOT recommended as `new Date` creates only one date on each server deployment, not a dynamic date in the future!
       //
