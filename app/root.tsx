@@ -8,16 +8,19 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import clsx from "clsx";
+import "~/tailwind.css";
+import { SpeedInsights } from "@vercel/speed-insights/remix";
+
 import {
   PreventFlashOnWrongTheme,
-  ThemeProvider,
   useTheme,
+  ThemeProvider,
 } from "remix-themes";
-
-import "./tailwind.css";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { themeSessionResolver } from "./utils/sessions.server";
+import clsx from "clsx";
+import Header from "./components/header";
+import Footer from "./components/footer";
 
 // Return the theme from the session storage using the loader
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -27,11 +30,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
   const [theme] = useTheme();
   return (
-    <html lang="en" className={clsx(theme ? theme : "light")}>
+    <html lang="en" className={clsx(theme)}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,10 +42,15 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         <PreventFlashOnWrongTheme ssrTheme={Boolean(data.theme)} />
         <Links />
       </head>
-      <body className="dark:bg-slate-900 bg-[#f5f5f5] font-poppins antialiased relative">
-        {children}
+      <body className="font-mono dark:bg-zinc-50 bg-black h-[100dvh] overflow-y-auto relative">
+        <Header />
+        <div className="md:mx-10 p-8 dark:bg-white bg-zinc-800">
+          <main className="my-3">{children}</main>
+          <Footer />
+        </div>
         <ScrollRestoration />
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   );
@@ -60,27 +68,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return <Outlet />;
 }
+
 export function ErrorBoundary() {
-  const error: any = useRouteError();
-
-  if (isRouteErrorResponse(error)) {
-    return (
-      <html>
-        <head>
-          <title>Oops!</title>
-          <Meta />
-          <Links />
-        </head>
-        <body>
-          <h1>
-            {error.status} {error.statusText}
-          </h1>
-          <p>{error.data}</p>
-        </body>
-      </html>
-    );
-  }
-
+  const error = useRouteError();
   return (
     <html>
       <head>
@@ -89,8 +79,14 @@ export function ErrorBoundary() {
         <Links />
       </head>
       <body>
-        <h1>Error!</h1>
-        <p>{error?.message ?? "Unknown error"}</p>
+        <h1>
+          {isRouteErrorResponse(error)
+            ? `${error.status} ${error.statusText}`
+            : error instanceof Error
+            ? error.message
+            : "Unknown Error"}
+        </h1>
+        <Scripts />
       </body>
     </html>
   );
