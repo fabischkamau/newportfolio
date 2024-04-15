@@ -4,7 +4,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import clsx from "clsx";
 import {
@@ -57,4 +59,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />;
+}
+export function ErrorBoundary() {
+  const error: any = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <html>
+        <head>
+          <title>Oops!</title>
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <h1>
+            {error.status} {error.statusText}
+          </h1>
+          <p>{error.data}</p>
+        </body>
+      </html>
+    );
+  }
+
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <h1>Error!</h1>
+        <p>{error?.message ?? "Unknown error"}</p>
+      </body>
+    </html>
+  );
 }
